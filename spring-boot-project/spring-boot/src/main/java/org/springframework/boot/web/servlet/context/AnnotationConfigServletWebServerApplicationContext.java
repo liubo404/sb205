@@ -121,8 +121,13 @@ public class AnnotationConfigServletWebServerApplicationContext
 	 */
 	@Override
 	public void setEnvironment(ConfigurableEnvironment environment) {
+//		1. 调⽤用⽗父类的setEnvironment⽅方法.代码如下:
 		super.setEnvironment(environment);
+
+//		2. 为AnnotatedBeanDefinitionReader设置Environment. 实例例化了了ConditionEvaluator
 		this.reader.setEnvironment(environment);
+
+//		3. 为ClassPathBeanDefinitionScanner设置Environment.
 		this.scanner.setEnvironment(environment);
 	}
 

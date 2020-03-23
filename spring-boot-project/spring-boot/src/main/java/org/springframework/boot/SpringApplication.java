@@ -388,17 +388,27 @@ public class SpringApplication {
 								ApplicationArguments applicationArguments, Banner printedBanner) {
 		//1.设置上下文环境
 		context.setEnvironment(environment);
+
+		// 2. 调⽤用postProcessApplicationContext⽅方法设置上下⽂文的beanNameGenerator和resourceLoader(如果SpringApplication有的话)
 		postProcessApplicationContext(context);
+
+		// 3. 拿到之前实例例化SpringApplication对象的时候设置的ApplicationContextInitializer，调用它们的initialize⽅方法，对上下⽂文做初始化
 		applyInitializers(context);
+
+		// 4. contextPrepared  是⼀一个空实现
 		listeners.contextPrepared(context);
+
+		// 5. 打印启动⽇日志
 		if (this.logStartupInfo) {
 			logStartupInfo(context.getParent() == null);
 			logStartupProfileInfo(context);
 		}
 
 		// Add boot specific singleton beans
-		context.getBeanFactory().registerSingleton("springApplicationArguments",
-				applicationArguments);
+		// 6. 日志往上下⽂的beanFactory中注册⼀一个singleton的bean，bean的名字是springApplication Arguments，bean的实例例是之前实例例化的ApplicationArguments对象
+		context.getBeanFactory().registerSingleton("springApplicationArguments", applicationArguments);
+
+		// 如果之前获取的printedBanner不不为空，那么往上下⽂文的beanFactory中注册⼀一个singleton的bean ，bean的名字是springBootBanner，bean的实例例就是这个printedBanner
 		if (printedBanner != null) {
 			context.getBeanFactory().registerSingleton("springBootBanner", printedBanner);
 		}
@@ -406,7 +416,11 @@ public class SpringApplication {
 		// Load the sources
 		Set<Object> sources = getAllSources();
 		Assert.notEmpty(sources, "Sources must not be empty");
+
+		// 7. 调⽤用load⽅方法注册启动类的bean定义，也就是调⽤用SpringApplication.run(Application.class, args);的类，SpringApplication的load⽅方法内会创建BeanDefinitionLoader的对象，并调⽤用它的load()⽅方法
 		load(context, sources.toArray(new Object[0]));
+
+		// 8. 调⽤用listeners的contextLoaded⽅方法，说明上下⽂文已经加载，该⽅方法先找到所有的Application Listener，遍历这些listener，如果该listener继承了了ApplicationContextAware类，那么在这⼀一步会调⽤用 它的setApplicationContext⽅方法，设置context
 		listeners.contextLoaded(context);
 	}
 
@@ -621,15 +635,23 @@ public class SpringApplication {
 	/**
 	 * Apply any relevant post processing the {@link ApplicationContext}. Subclasses can
 	 * apply additional processing as required.
+	 * <p>
+	 * 2.调⽤用postProcessApplicationContext⽅方法设置上下⽂文的beanNameGenerator和resourceLoa der(如果SpringApplication有的话)
 	 *
 	 * @param context the application context
 	 */
 	protected void postProcessApplicationContext(ConfigurableApplicationContext context) {
+//		1. 如果beanNameGenerator不不为null的话,就向BeanFactory进⾏行行注册,bean id 为 org.springframework.context.annotation.internalConfigurationBeanNameGenerator.
+//		对于当前, beanNameGenerator是等于null的
 		if (this.beanNameGenerator != null) {
 			context.getBeanFactory().registerSingleton(
 					AnnotationConfigUtils.CONFIGURATION_BEAN_NAME_GENERATOR,
 					this.beanNameGenerator);
 		}
+//		2. 如果resourceLoader不不为null的话
+//		1. 如果context 是 GenericApplicationContext ⼦子类的话,就为其设置ResourceLoader
+//		2. 如果context 是DefaultResourceLoader ⼦子类的话,就为其设置ClassLoader
+//		对于当前, resourceLoader是等于null的
 		if (this.resourceLoader != null) {
 			if (context instanceof GenericApplicationContext) {
 				((GenericApplicationContext) context)
@@ -645,6 +667,9 @@ public class SpringApplication {
 	/**
 	 * Apply any {@link ApplicationContextInitializer}s to the context before it is
 	 * refreshed.
+	 * <p>
+	 * 3. 拿到之前实例例化SpringApplication对象的时候设置的ApplicationContextInitializer，调
+	 * ⽤用它们的initialize⽅方法，对上下⽂文做初始化
 	 *
 	 * @param context the configured ApplicationContext (not refreshed yet)
 	 * @see ConfigurableApplicationContext#refresh()
