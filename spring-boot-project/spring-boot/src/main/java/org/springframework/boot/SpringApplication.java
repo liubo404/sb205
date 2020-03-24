@@ -423,6 +423,7 @@ public class SpringApplication {
 
 		// 8. 调⽤用listeners的contextLoaded⽅方法，说明上下⽂文已经加载，该⽅方法先找到所有的Application Listener，遍历这些listener，如果该listener继承了了ApplicationContextAware类，那么在这⼀一步会调⽤用 它的setApplicationContext⽅方法，设置context
 		listeners.contextLoaded(context);
+		//调⽤用EventPublishingRunListener#contextLoaded,
 	}
 
 	private void refreshContext(ConfigurableApplicationContext context) {

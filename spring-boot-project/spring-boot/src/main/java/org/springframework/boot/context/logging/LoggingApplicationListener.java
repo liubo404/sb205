@@ -200,12 +200,14 @@ public class LoggingApplicationListener implements GenericApplicationListener {
 		initialize(event.getEnvironment(), event.getSpringApplication().getClassLoader());
 	}
 
+
 	private void onApplicationPreparedEvent(ApplicationPreparedEvent event) {
 		ConfigurableListableBeanFactory beanFactory = event.getApplicationContext()
 				.getBeanFactory();
 		if (!beanFactory.containsBean(LOGGING_SYSTEM_BEAN_NAME)) {
 			beanFactory.registerSingleton(LOGGING_SYSTEM_BEAN_NAME, this.loggingSystem);
 		}
+		//向beanFactory注册了了⼀一个id为 springBootLoggingSystem,class 为 LoggingSystem 的bean.
 	}
 
 	private void onContextClosedEvent() {

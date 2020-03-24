@@ -22,7 +22,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 import org.springframework.beans.factory.getBean
-//import org.springframework.boot.web.servlet.server.MockServletWebServerFactory
+import org.springframework.boot.web.servlet.server.MockServletWebServerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.StandardEnvironment
@@ -73,10 +73,10 @@ class SpringApplicationExtensionsTests {
 	@Configuration
 	internal open class ExampleWebConfig {
 
-//		@Bean
-//		open fun webServer(): MockServletWebServerFactory {
-//			return MockServletWebServerFactory()
-//		}
+		@Bean
+		open fun webServer(): MockServletWebServerFactory {
+			return MockServletWebServerFactory()
+		}
 
 	}
 

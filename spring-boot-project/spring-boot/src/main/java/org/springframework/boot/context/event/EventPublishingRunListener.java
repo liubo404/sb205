@@ -80,14 +80,39 @@ public class EventPublishingRunListener implements SpringApplicationRunListener,
 
 	}
 
+	/**
+	 * 2件事
+	 * 1. 遍历application 中的ApplicationListener,
+	 * 如果listener 实现了了ApplicationContextAware的话,
+	 * 就调⽤用其 setApplicationContext进⾏行行赋值.
+	 * 当前的如下：
+	 *   org.springframework.boot.context.config.ConfigFileApplicationListener,
+	 *     org.springframework.boot.context.config.AnsiOutputApplicationListener,
+	 *     org.springframework.boot.logging.LoggingApplicationListener,
+	 *     org.springframework.boot.logging.ClasspathLoggingApplicationListener,
+	 *     org.springframework.boot.autoconfigure.BackgroundPreinitializer,
+	 *     org.springframework.boot.context.config.DelegatingApplicationListener,
+	 *     org.springframework.boot.builder.ParentContextCloserApplicationListener,
+	 *     org.springframework.boot.ClearCachesApplicationListener,
+	 *     org.springframework.boot.context.FileEncodingApplicationListener,
+	 *     org.springframework.boot.liquibase.LiquibaseServiceLocatorApplicationListener
+	 *
+	 * @param context the application context
+	 */
 	@Override
 	public void contextLoaded(ConfigurableApplicationContext context) {
 		for (ApplicationListener<?> listener : this.application.getListeners()) {
 			if (listener instanceof ApplicationContextAware) {
 				((ApplicationContextAware) listener).setApplicationContext(context);
 			}
+			//只有ParentContextCloserApplicationListener实现了了ApplicationContextAware接⼝口.
+			// 然后添加到 ConfigurableApplicationContext中,
 			context.addApplicationListener(listener);
+			//TODO 执⾏行行完该步骤后, applicationListeners有几个?
 		}
+		//2. 发送ApplicationPreparedEvent 事件.
+		// 由前可知,会依次调⽤用listener的onApplicationEvent事件,
+		// 接下来我们就 来看看其各⾃自的实现.
 		this.initialMulticaster.multicastEvent(
 				new ApplicationPreparedEvent(this.application, this.args, context));
 	}
