@@ -103,6 +103,7 @@ public class ConfigurationWarningsApplicationContextInitializer
 		@Override
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 			//实现了了BeanDefinitionRegistryPostProcessor
+			//1. 遍历checks.注意,这⾥里里只持有了了ComponentScanPackageCheck
 			for (Check check : this.checks) {
 				String message = check.getWarning(registry);
 				if (StringUtils.hasLength(message)) {
@@ -153,8 +154,11 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 		@Override
 		public String getWarning(BeanDefinitionRegistry registry) {
+			// 1. 从BeanDefinitionRegistry中获得注解了了@ComponentScan的配置值
 			Set<String> scannedPackages = getComponentScanningPackages(registry);
+			// 2. 判断scannedPackages中是否存在org.springframework,org
 			List<String> problematicPackages = getProblematicPackages(scannedPackages);
+			// 3. 如果problematicPackages等于空,则返回null,否则返回message
 			if (problematicPackages.isEmpty()) {
 				return null;
 			}
@@ -167,13 +171,17 @@ public class ConfigurationWarningsApplicationContextInitializer
 		protected Set<String> getComponentScanningPackages(
 				BeanDefinitionRegistry registry) {
 			Set<String> packages = new LinkedHashSet<>();
+			// 1. 从BeanDefinitionRegistry获得Bean definition的名字,遍历之
 			String[] names = registry.getBeanDefinitionNames();
 			for (String name : names) {
+				// 2.获得对应的BeanDefinition,
 				BeanDefinition definition = registry.getBeanDefinition(name);
+				//如果其是AnnotatedBeanDefinition的实例例
 				if (definition instanceof AnnotatedBeanDefinition) {
+					// 如果该类声明了了@ComponentScan注解,则获得@ComponentScan配置的value,basePackages,basePackageClasses
 					AnnotatedBeanDefinition annotatedDefinition = (AnnotatedBeanDefinition) definition;
-					addComponentScanningPackages(packages,
-							annotatedDefinition.getMetadata());
+					// 添加到packages中,如果packages为空,则将当前类的包名添加到packages中
+					addComponentScanningPackages(packages, annotatedDefinition.getMetadata());
 				}
 			}
 			return packages;
@@ -181,8 +189,11 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 		private void addComponentScanningPackages(Set<String> packages,
 												  AnnotationMetadata metadata) {
+			// 如果该类声明了了@ComponentScan注解,则获得@ComponentScan配置的value,bas ePackages,basePackageClasses
 			AnnotationAttributes attributes = AnnotationAttributes.fromMap(metadata
 					.getAnnotationAttributes(ComponentScan.class.getName(), true));
+
+			// 添加到packages中,如果packages为空,则将当前类的包名添加到packages中
 			if (attributes != null) {
 				addPackages(packages, attributes.getStringArray("value"));
 				addPackages(packages, attributes.getStringArray("basePackages"));
@@ -209,7 +220,12 @@ public class ConfigurationWarningsApplicationContextInitializer
 
 		private List<String> getProblematicPackages(Set<String> scannedPackages) {
 			List<String> problematicPackages = new ArrayList<>();
+			// 1. 遍历scannedPackages
 			for (String scannedPackage : scannedPackages) {
+				// 1.1 如果scannedPackage等于null,
+				// 或者scannedPackage等于空字符串串,
+				// 或者scann edPackage等于org.springframework,org,
+				// 则返回true-->加⼊入到problematicPackages中
 				if (isProblematicPackage(scannedPackage)) {
 					problematicPackages.add(getDisplayName(scannedPackage));
 				}

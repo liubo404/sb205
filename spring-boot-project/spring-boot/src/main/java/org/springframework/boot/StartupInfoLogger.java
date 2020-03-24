@@ -47,9 +47,11 @@ class StartupInfoLogger {
 	public void logStarting(Log log) {
 		Assert.notNull(log, "Log must not be null");
 		if (log.isInfoEnabled()) {
+			//1. 如果⽇日志级别是info的话,调⽤用getStartupMessage进⾏行行打印
 			log.info(getStartupMessage());
 		}
 		if (log.isDebugEnabled()) {
+			//2. 如果⽇日志级别是debug的话,调⽤用getRunningMessage进⾏行行打印
 			log.debug(getRunningMessage());
 		}
 	}

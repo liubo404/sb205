@@ -114,8 +114,7 @@ public class DelegatingApplicationContextInitializer implements
 	}
 
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	private void applyInitializers(ConfigurableApplicationContext context,
-								   List<ApplicationContextInitializer<?>> initializers) {
+	private void applyInitializers(ConfigurableApplicationContext context, List<ApplicationContextInitializer<?>> initializers) {
 		// 排序后调⽤用具体ApplicationContextInitializer类中的initialize⽅方法
 		initializers.sort(new AnnotationAwareOrderComparator());
 		for (ApplicationContextInitializer initializer : initializers) {

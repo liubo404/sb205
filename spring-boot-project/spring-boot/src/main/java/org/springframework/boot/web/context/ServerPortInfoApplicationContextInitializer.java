@@ -16,9 +16,6 @@
 
 package org.springframework.boot.web.context;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.context.ApplicationContext;
@@ -31,6 +28,9 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.MutablePropertySources;
 import org.springframework.core.env.PropertySource;
 import org.springframework.util.StringUtils;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * {@link ApplicationContextInitializer} that sets {@link Environment} properties for the
@@ -55,23 +55,30 @@ public class ServerPortInfoApplicationContextInitializer
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
+		//向applicationContext 添加⼀一个监听.
+		// 当发⽣生EmbeddedServletContainerInitializedEvent时间时.
+		// 会执⾏行行 ServerPortInfoApplicationContextInitializer#onApplicationEvent⽅方法.
 		applicationContext.addApplicationListener(this);
 	}
 
 	@Override
 	public void onApplicationEvent(WebServerInitializedEvent event) {
 		String propertyName = "local." + getName(event.getApplicationContext()) + ".port";
-		setPortProperty(event.getApplicationContext(), propertyName,
-				event.getWebServer().getPort());
+		//2. 向Environment添加名为server.ports的MapPropertySource,其持有的数据为key-- >local.server.port,value-->当前的端⼝口号,如果当前的Context存在⽗父容器器的话,也向其⽗父容器器添加(对于当 前,⽗父容器器是不不存在的)
+		setPortProperty(event.getApplicationContext(), propertyName, event.getWebServer().getPort());
 	}
 
 	private String getName(WebServerApplicationContext context) {
+		//1. 获得Namespace,如果为空,则设置为server
 		String name = context.getServerNamespace();
+		//2. 进⾏行行拼接返回.
 		return StringUtils.hasText(name) ? name : "server";
+
+		//此时,由于Namespace没有配置,因此返回的是local.server.port
 	}
 
 	private void setPortProperty(ApplicationContext context, String propertyName,
-			int port) {
+								 int port) {
 		if (context instanceof ConfigurableApplicationContext) {
 			setPortProperty(((ConfigurableApplicationContext) context).getEnvironment(),
 					propertyName, port);
@@ -83,7 +90,7 @@ public class ServerPortInfoApplicationContextInitializer
 
 	@SuppressWarnings("unchecked")
 	private void setPortProperty(ConfigurableEnvironment environment, String propertyName,
-			int port) {
+								 int port) {
 		MutablePropertySources sources = environment.getPropertySources();
 		PropertySource<?> source = sources.get("server.ports");
 		if (source == null) {

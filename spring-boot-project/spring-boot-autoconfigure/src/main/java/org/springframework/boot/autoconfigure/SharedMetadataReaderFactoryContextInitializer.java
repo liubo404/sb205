@@ -54,8 +54,8 @@ class SharedMetadataReaderFactoryContextInitializer
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
-		applicationContext.addBeanFactoryPostProcessor(
-				new CachingMetadataReaderFactoryPostProcessor());
+		//向applicationContext 添加了一个CachingMetadataReaderFactoryPostProcessor 的 BeanFactoryPostProcessor
+		applicationContext.addBeanFactoryPostProcessor(new CachingMetadataReaderFactoryPostProcessor());
 	}
 
 	/**
@@ -80,7 +80,10 @@ class SharedMetadataReaderFactoryContextInitializer
 		@Override
 		public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry)
 				throws BeansException {
+			//1. 注册了了⼀一个id为org.springframework.boot.autoconfigure.internalCachingMetadataReaderFactory,
+			// 类型为 SharedMetadataReaderFactoryBean的bean
 			register(registry);
+			//2. 获得id为org.springframework.context.annotation.internalConfigurationAnnotationProcessor的 BeanDefinition(类型为ConfigurationClassPostProcessor),向其添加metadataReaderFactory的属性,引⽤用 SharedMetadataReaderFactoryBean
 			configureConfigurationClassPostProcessor(registry);
 		}
 
@@ -97,8 +100,7 @@ class SharedMetadataReaderFactoryContextInitializer
 						AnnotationConfigUtils.CONFIGURATION_ANNOTATION_PROCESSOR_BEAN_NAME);
 				definition.getPropertyValues().add("metadataReaderFactory",
 						new RuntimeBeanReference(BEAN_NAME));
-			}
-			catch (NoSuchBeanDefinitionException ex) {
+			} catch (NoSuchBeanDefinitionException ex) {
 			}
 		}
 

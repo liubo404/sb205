@@ -16,12 +16,7 @@
 
 package org.springframework.boot;
 
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
 import groovy.lang.Closure;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.beans.factory.groovy.GroovyBeanDefinitionReader;
@@ -44,6 +39,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Loads bean definitions from underlying sources, including XML and JavaConfig. Acts as a
@@ -71,24 +70,32 @@ class BeanDefinitionLoader {
 	/**
 	 * Create a new {@link BeanDefinitionLoader} that will load beans into the specified
 	 * {@link BeanDefinitionRegistry}.
+	 *
 	 * @param registry the bean definition registry that will contain the loaded beans
-	 * @param sources the bean sources
+	 * @param sources  the bean sources
 	 */
 	BeanDefinitionLoader(BeanDefinitionRegistry registry, Object... sources) {
 		Assert.notNull(registry, "Registry must not be null");
 		Assert.notEmpty(sources, "Sources must not be empty");
+		//1. 将sources赋值给BeanDefinitionLoader中的sources
 		this.sources = sources;
+		//2. 实例例化AnnotatedBeanDefinitionReader.该实例例化的过程我们 TODO 之前有分析过
 		this.annotatedReader = new AnnotatedBeanDefinitionReader(registry);
+		//3. 实例例化了了XmlBeanDefinitionReader
 		this.xmlReader = new XmlBeanDefinitionReader(registry);
+		//4. 判断是否是在groovy的环境中,如果是的话,就实例例化GroovyBeanDefinitionReader.⼀一般情况下,是不不会实例例化的.
 		if (isGroovyPresent()) {
 			this.groovyReader = new GroovyBeanDefinitionReader(registry);
 		}
+		//5. 实例例化ClassPathBeanDefinitionScanner.该实例例化的过程我们 TODO 之前有分析过.
+		// 并将启动类,添加到 ClassPathBeanDefinitionScanner的ExcludeFilter中
 		this.scanner = new ClassPathBeanDefinitionScanner(registry);
 		this.scanner.addExcludeFilter(new ClassExcludeFilter(sources));
 	}
 
 	/**
 	 * Set the bean name generator to be used by the underlying readers and scanner.
+	 *
 	 * @param beanNameGenerator the bean name generator
 	 */
 	public void setBeanNameGenerator(BeanNameGenerator beanNameGenerator) {
@@ -99,6 +106,7 @@ class BeanDefinitionLoader {
 
 	/**
 	 * Set the resource loader to be used by the underlying readers and scanner.
+	 *
 	 * @param resourceLoader the resource loader
 	 */
 	public void setResourceLoader(ResourceLoader resourceLoader) {
@@ -109,6 +117,7 @@ class BeanDefinitionLoader {
 
 	/**
 	 * Set the environment to be used by the underlying readers and scanner.
+	 *
 	 * @param environment the environment
 	 */
 	public void setEnvironment(ConfigurableEnvironment environment) {
@@ -119,10 +128,13 @@ class BeanDefinitionLoader {
 
 	/**
 	 * Load the sources into the reader.
+	 *
 	 * @return the number of loaded beans
 	 */
 	public int load() {
+		//1. 声明一个计数器器,该计数器器统计的是sources中加载bean的数量量.
 		int count = 0;
+		//2. 遍历sources,进⾏行行加载.
 		for (Object source : this.sources) {
 			count += load(source);
 		}
@@ -155,9 +167,12 @@ class BeanDefinitionLoader {
 			load(loader);
 		}
 		if (isComponent(source)) {
+			// 进⾏行行注册
 			this.annotatedReader.register(source);
 			return 1;
 		}
+
+		//如果以上都没匹配到的话,就返回0.
 		return 0;
 	}
 
@@ -189,8 +204,7 @@ class BeanDefinitionLoader {
 		// Attempt as a Class
 		try {
 			return load(ClassUtils.forName(resolvedSource, null));
-		}
-		catch (IllegalArgumentException | ClassNotFoundException ex) {
+		} catch (IllegalArgumentException | ClassNotFoundException ex) {
 			// swallow exception and continue
 		}
 		// Attempt as resources
@@ -225,9 +239,8 @@ class BeanDefinitionLoader {
 			if (loader instanceof ResourcePatternResolver) {
 				return ((ResourcePatternResolver) loader).getResources(source);
 			}
-			return new Resource[] { loader.getResource(source) };
-		}
-		catch (IOException ex) {
+			return new Resource[]{loader.getResource(source)};
+		} catch (IOException ex) {
 			throw new IllegalStateException("Error reading source '" + source + "'");
 		}
 	}
@@ -245,8 +258,7 @@ class BeanDefinitionLoader {
 			if (path.indexOf('.') == -1) {
 				try {
 					return Package.getPackage(path) == null;
-				}
-				catch (Exception ex) {
+				} catch (Exception ex) {
 					// Ignore
 				}
 			}
@@ -272,13 +284,25 @@ class BeanDefinitionLoader {
 				load(Class.forName(source.toString() + "." + className));
 				break;
 			}
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			// swallow exception and continue
 		}
 		return Package.getPackage(source.toString());
 	}
 
+	/**
+	 * 1. 如果当前类上有@Component 注解的话,则返回true.
+	 * 2. 如果当前类的类名匹配.*\$_.*closure.* ,或者是⼀一个匿匿名类,或者构造器器不不存在的话,返回false.
+	 * 3. 如果以上都不不匹配的话,返回true.
+	 * 由于我们在启动类上加了了@SpringBootApplication的注解,
+	 * 又由于@SpringBootApplication中存在 @SpringBootConfiguration,
+	 * 而@SpringBootConfiguration中⼜存在@Configuration,
+	 * 最终在 @Configuration中存在@Component,
+	 * 因此匹配1,因此返回true.
+	 *
+	 * @param type
+	 * @return
+	 */
 	private boolean isComponent(Class<?> type) {
 		// This has to be a bit of a guess. The only way to be sure that this type is
 		// eligible is to make a bean definition out of it and try to instantiate it.

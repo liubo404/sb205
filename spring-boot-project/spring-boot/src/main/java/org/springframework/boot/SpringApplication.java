@@ -400,6 +400,7 @@ public class SpringApplication {
 
 		// 5. 打印启动⽇日志
 		if (this.logStartupInfo) {
+			//1. 判断是否允许打印启动信息,默认是true.如果为false,则不不进⾏行行打印.
 			logStartupInfo(context.getParent() == null);
 			logStartupProfileInfo(context);
 		}
@@ -699,6 +700,9 @@ public class SpringApplication {
 	 * @param isRoot true if this application is the root of a context hierarchy
 	 */
 	protected void logStartupInfo(boolean isRoot) {
+		//由于此时的context为顶级容器器,因此为实例例化StartupInfoLogger,实例例化时将启动类传⼊入构造器器,
+		// 然后调⽤用其 logStarting⽅方法.调⽤用时,
+		// 首先getApplicationLog获得启动类的log.代码如下:
 		if (isRoot) {
 			new StartupInfoLogger(this.mainApplicationClass)
 					.logStarting(getApplicationLog());
@@ -734,6 +738,7 @@ public class SpringApplication {
 		if (this.mainApplicationClass == null) {
 			return logger;
 		}
+		//由于此时的mainApplicationClass不不为null,因此会实例例化启动类的Log.
 		return LogFactory.getLog(this.mainApplicationClass);
 	}
 
@@ -748,17 +753,26 @@ public class SpringApplication {
 			logger.debug(
 					"Loading source " + StringUtils.arrayToCommaDelimitedString(sources));
 		}
-		BeanDefinitionLoader loader = createBeanDefinitionLoader(
-				getBeanDefinitionRegistry(context), sources);
+		logger.info("Loading source  " + StringUtils.arrayToCommaDelimitedString(sources));
+		// 1. 实例例化BeanDefinitionLoader
+		BeanDefinitionLoader loader = createBeanDefinitionLoader(getBeanDefinitionRegistry(context), sources);
+
+		// 2. 如果当前的beanNameGenerator 不是null的话,就将SpringApplication中的beanNameGenerator赋值给BeanDefinitionLoader
 		if (this.beanNameGenerator != null) {
 			loader.setBeanNameGenerator(this.beanNameGenerator);
 		}
+
+		// 3. 如果当前的resourceLoader 不不会null的话,就将SpringApplication中的resourceLoader赋 值给BeanDefinitionLoader
 		if (this.resourceLoader != null) {
 			loader.setResourceLoader(this.resourceLoader);
 		}
+
+		// 4. 如果当前的environment 不不会null的话,就将SpringApplication中的environment赋值给Bea nDefinitionLoader
 		if (this.environment != null) {
 			loader.setEnvironment(this.environment);
 		}
+
+		// 5. 调⽤用load⽅方法进⾏行行加载
 		loader.load();
 	}
 
