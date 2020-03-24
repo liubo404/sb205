@@ -16,9 +16,6 @@
 
 package org.springframework.boot.context.config;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationContextException;
 import org.springframework.context.ApplicationContextInitializer;
@@ -30,6 +27,9 @@ import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * {@link ApplicationContextInitializer} that delegates to other initializers that are
@@ -50,17 +50,22 @@ public class DelegatingApplicationContextInitializer implements
 	@Override
 	public void initialize(ConfigurableApplicationContext context) {
 		ConfigurableEnvironment environment = context.getEnvironment();
+		// 1. 通过env获取到context.initializer.classes配置的值，如果有则直接获取到具体的值并进行实例例化
 		List<Class<?>> initializerClasses = getInitializerClasses(environment);
 		if (!initializerClasses.isEmpty()) {
+			//3. 如果有配置的话,就掉⽤用applyInitializerClasses⽅方法进⾏行行初始化
 			applyInitializerClasses(context, initializerClasses);
 		}
 	}
 
 	private List<Class<?>> getInitializerClasses(ConfigurableEnvironment env) {
+		//1. 从env获得context.initializer.classes 配置的值
 		String classNames = env.getProperty(PROPERTY_NAME);
 		List<Class<?>> classes = new ArrayList<>();
+		//2. 如果有配置的话,就依次遍历之,如果有多个的话,⽤用,分隔即可. ⼀一般是没有配置的,这⾥里里是⼀一个扩展 点
 		if (StringUtils.hasLength(classNames)) {
 			for (String className : StringUtils.tokenizeToStringArray(classNames, ",")) {
+				//3. 调⽤用getInitializerClass 进⾏行行加载
 				classes.add(getInitializerClass(className));
 			}
 		}
@@ -69,29 +74,31 @@ public class DelegatingApplicationContextInitializer implements
 
 	private Class<?> getInitializerClass(String className) throws LinkageError {
 		try {
-			Class<?> initializerClass = ClassUtils.forName(className,
-					ClassUtils.getDefaultClassLoader());
+			//1.进行加载
+			Class<?> initializerClass = ClassUtils.forName(className, ClassUtils.getDefaultClassLoader());
+			// 2. 要加载的类必须是ApplicationContextInitializer 实现才⾏行行
 			Assert.isAssignable(ApplicationContextInitializer.class, initializerClass);
 			return initializerClass;
-		}
-		catch (ClassNotFoundException ex) {
+		} catch (ClassNotFoundException ex) {
 			throw new ApplicationContextException(
 					"Failed to load context initializer class [" + className + "]", ex);
 		}
 	}
 
 	private void applyInitializerClasses(ConfigurableApplicationContext context,
-			List<Class<?>> initializerClasses) {
+										 List<Class<?>> initializerClasses) {
 		Class<?> contextClass = context.getClass();
 		List<ApplicationContextInitializer<?>> initializers = new ArrayList<>();
+		//1. 依次遍历initializerClasses 进⾏行行初始化.(实例化)
 		for (Class<?> initializerClass : initializerClasses) {
 			initializers.add(instantiateInitializer(contextClass, initializerClass));
 		}
+		//2. 实例例化完毕后调⽤用applyInitializers,依次调⽤用其initialize⽅方法
 		applyInitializers(context, initializers);
 	}
 
 	private ApplicationContextInitializer<?> instantiateInitializer(Class<?> contextClass,
-			Class<?> initializerClass) {
+																	Class<?> initializerClass) {
 		Class<?> requireContextClass = GenericTypeResolver.resolveTypeArgument(
 				initializerClass, ApplicationContextInitializer.class);
 		Assert.isAssignable(requireContextClass, contextClass,
@@ -106,9 +113,10 @@ public class DelegatingApplicationContextInitializer implements
 				.instantiateClass(initializerClass);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private void applyInitializers(ConfigurableApplicationContext context,
-			List<ApplicationContextInitializer<?>> initializers) {
+								   List<ApplicationContextInitializer<?>> initializers) {
+		// 排序后调⽤用具体ApplicationContextInitializer类中的initialize⽅方法
 		initializers.sort(new AnnotationAwareOrderComparator());
 		for (ApplicationContextInitializer initializer : initializers) {
 			initializer.initialize(context);

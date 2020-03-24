@@ -670,15 +670,23 @@ public class SpringApplication {
 	 * <p>
 	 * 3. 拿到之前实例例化SpringApplication对象的时候设置的ApplicationContextInitializer，调
 	 * ⽤用它们的initialize⽅方法，对上下⽂文做初始化
+	 * <p>
+	 * <p>
+	 * org.springframework.boot.context.config.DelegatingApplicationContextInitializer,
+	 * org.springframework.boot.context.ContextIdApplicationContextInitializer,
+	 * org.springframework.boot.context.ConfigurationWarningsApplicationContextInitializer,
+	 * org.springframework.boot.context.embedded.ServerPortInfoApplicationContextInitializer,
+	 * org.springframework.boot.autoconfigure.SharedMetadataReaderFactoryContextInitializer,
+	 * org.springframework.boot.autoconfigure.logging.AutoConfigurationReportLoggingInitializer
 	 *
 	 * @param context the configured ApplicationContext (not refreshed yet)
 	 * @see ConfigurableApplicationContext#refresh()
 	 */
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	protected void applyInitializers(ConfigurableApplicationContext context) {
+		//getInitializers()
 		for (ApplicationContextInitializer initializer : getInitializers()) {
-			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(
-					initializer.getClass(), ApplicationContextInitializer.class);
+			Class<?> requiredType = GenericTypeResolver.resolveTypeArgument(initializer.getClass(), ApplicationContextInitializer.class);
 			Assert.isInstanceOf(requiredType, context, "Unable to call initializer.");
 			initializer.initialize(context);
 		}
@@ -1276,6 +1284,13 @@ public class SpringApplication {
 	/**
 	 * Returns read-only ordered Set of the {@link ApplicationContextInitializer}s that
 	 * will be applied to the Spring {@link ApplicationContext}.
+	 * <p>
+	 * org.springframework.boot.context.config.DelegatingApplicationContextInitializer,
+	 * org.springframework.boot.context.ContextIdApplicationContextInitializer,
+	 * org.springframework.boot.context.ConfigurationWarningsApplicationContextInitializer,
+	 * org.springframework.boot.context.embedded.ServerPortInfoApplicationContextInitializer,
+	 * org.springframework.boot.autoconfigure.SharedMetadataReaderFactoryContextInitializer,
+	 * org.springframework.boot.autoconfigure.logging.AutoConfigurationReportLoggingInitializer
 	 *
 	 * @return the initializers
 	 */

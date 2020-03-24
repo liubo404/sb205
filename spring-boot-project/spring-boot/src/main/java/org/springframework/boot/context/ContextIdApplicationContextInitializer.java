@@ -16,14 +16,14 @@
 
 package org.springframework.boot.context;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextInitializer;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.util.StringUtils;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * {@link ApplicationContextInitializer} that sets the Spring
@@ -50,10 +50,10 @@ public class ContextIdApplicationContextInitializer implements
 
 	@Override
 	public void initialize(ConfigurableApplicationContext applicationContext) {
+
 		ContextId contextId = getContextId(applicationContext);
 		applicationContext.setId(contextId.getId());
-		applicationContext.getBeanFactory().registerSingleton(ContextId.class.getName(),
-				contextId);
+		applicationContext.getBeanFactory().registerSingleton(ContextId.class.getName(), contextId);
 	}
 
 	private ContextId getContextId(ConfigurableApplicationContext applicationContext) {
@@ -61,10 +61,18 @@ public class ContextIdApplicationContextInitializer implements
 		if (parent != null && parent.containsBean(ContextId.class.getName())) {
 			return parent.getBean(ContextId.class).createChildId();
 		}
+		//1. 通过applicationContext 获得ConfigurableEnvironment
+		//2.调⽤用getApplicationId ⽣生成id
 		return new ContextId(getApplicationId(applicationContext.getEnvironment()));
 	}
 
 	private String getApplicationId(ConfigurableEnvironment environment) {
+
+		//1. 获取名称。
+		// 名称的取值依赖如下⼏几个属性获取名称 spring.application.name,
+		// vcap.application.name,
+		// spring.config.name
+		// application默认是application
 		String name = environment.getProperty("spring.application.name");
 		return StringUtils.hasText(name) ? name : "application";
 	}
