@@ -201,7 +201,10 @@ public class AnnotationConfigServletWebServerApplicationContext
 
 	@Override
 	protected void prepareRefresh() {
+		//1. 清空ClassPathBeanDefinitionScanner的缓存.
 		this.scanner.clearCache();
+
+		//2.调⽤用其⽗父类的AbstractApplicationContext的prepareRefresh⽅方法.
 		super.prepareRefresh();
 	}
 

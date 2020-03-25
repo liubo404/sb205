@@ -331,6 +331,7 @@ public class SpringApplication {
 
 			prepareContext(context, environment, listeners, applicationArguments, printedBanner);
 
+			//step.9.我们来到了了SpringApplication#run⽅方法的第9步,这步做的⼯工作⽐比较多.我们慢慢来.
 			refreshContext(context);
 
 			afterRefresh(context, applicationArguments);
@@ -427,7 +428,11 @@ public class SpringApplication {
 	}
 
 	private void refreshContext(ConfigurableApplicationContext context) {
+		//1. 调⽤用AbstractApplicationContext#refresh 完成初始化.
 		refresh(context);
+
+		//2. 注册⼀一个关闭容器器时的钩⼦子函数,如果registerShutdownHook 为true的话,默认是true.
+		// 注册⼀一个关闭容器器时的钩⼦子函数
 		if (this.registerShutdownHook) {
 			try {
 				context.registerShutdownHook();
