@@ -210,6 +210,7 @@ public class AnnotationConfigServletWebServerApplicationContext
 
 	@Override
 	protected void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+		//1. 调⽤用⽗父类EmbeddedWebApplicationContext#postProcessBeanFactory⽅方法.给beanFactory添加⼀一个 WebApplicationContextServletContextAwareProcessor类型的BeanPostProcessor，并添加了了⼀一个忽略略装配的接⼝口 ServletContextAware.WebApplicationContextServletContextAwareProcessor继承了了ServletContextAwareProcessor，⽽而ServletContextAwareProcessor 的postProcessBeforeInitialization⽅方法代码已经做了了ServletContextAware该做的事情.代码如下
 		super.postProcessBeanFactory(beanFactory);
 		if (this.basePackages != null && this.basePackages.length > 0) {
 			this.scanner.scan(this.basePackages);

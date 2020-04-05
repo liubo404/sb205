@@ -154,7 +154,7 @@ import java.util.Set;
 public class SpringApplication {
 
 	/**
-	 * The class name of application context that will be used by default for non-web
+	 * The class name of application context that will beAnnotationConfigApplicationContext used by default for non-web
 	 * environments.
 	 */
 	public static final String DEFAULT_CONTEXT_CLASS = "org.springframework.context."
@@ -329,6 +329,7 @@ public class SpringApplication {
 					SpringBootExceptionReporter.class,
 					new Class[]{ConfigurableApplicationContext.class}, context);
 
+			//step.8.
 			prepareContext(context, environment, listeners, applicationArguments, printedBanner);
 
 			//step.9.我们来到了了SpringApplication#run⽅方法的第9步,这步做的⼯工作⽐比较多.我们慢慢来.
@@ -779,7 +780,9 @@ public class SpringApplication {
 		}
 
 		// 5. 调⽤用load⽅方法进⾏行行加载
-		loader.load();
+		int loadCount = loader.load();
+
+		logger.info("===> loadCount="+loadCount);
 	}
 
 	/**
