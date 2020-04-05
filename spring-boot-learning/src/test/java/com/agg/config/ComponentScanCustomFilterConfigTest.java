@@ -4,18 +4,17 @@ import org.junit.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-public class ComponentScanExcludeConfigTest {
+public class ComponentScanCustomFilterConfigTest {
 
 	@Test
-	public void excludeTest() {
-
-		ApplicationContext context = new AnnotationConfigApplicationContext(ComponentScanExcludeConfig.class);
+	public void includeTest() {
+		ApplicationContext context = new AnnotationConfigApplicationContext(ComponentScanCustomFilterConfig.class);
 
 
 		String[] beanNamesForType = context.getBeanDefinitionNames();
 		for (String name : beanNamesForType) {
-			System.out.println("-->  beanNames: " + name);
+			System.out.println("--> include custome filter  beanNames: " + name);
 		}
-
 	}
+
 }

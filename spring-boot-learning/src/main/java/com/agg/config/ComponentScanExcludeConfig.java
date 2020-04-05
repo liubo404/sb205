@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 //配置类==配置文件
 @Configuration //告诉Spring这是一个配置类
 @ComponentScan(value = "com.agg", excludeFilters = {
-		@Filter(type = FilterType.ANNOTATION, classes = {Controller.class,Service.class})
+		@Filter(type = FilterType.ANNOTATION, classes = {Controller.class, Service.class})
 })
 public class ComponentScanExcludeConfig {
 
