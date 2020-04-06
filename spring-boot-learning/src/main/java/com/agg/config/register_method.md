@@ -45,6 +45,26 @@
   postProcessBeforeInitialization:在初始化之前工作
   postProcessAfterInitialization:在初始化之后工作
   
-  
-  
+
+## BeanPostProcessor原理
+```java
+populateBean(beanName, mbd, instanceWrapper);//给属性赋值
+
+initializeBean(){
+ applyBeanPostProcessorsBeforeInitialization(wrappedBean, beanName);
+ invokeInitMethods(beanName, wrappedBean, mbd);//执行自定义初始化
+ applyBeanPostProcessorsAfterInitialization(wrappedBean, beanName);
+}  
+
+```  
+    
+## Spring底层对BeanPostProcessor的使用
+bean赋值，注入其它组件，@Autowired,
+生命周期注解功能，@Async...等等...
+
+
+ApplicationContextAwareProcesor
+
+InitDestroyAnnotationBeanPostProcessor 处理@PostContruct @PreConstruct
+
     
