@@ -12,6 +12,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
  * @date 2020-04-06 16:19
  * @description
  **/
+//@Conditional() 放在类上，满足当前条件，这个类中配置的所有bean注册才能生效
 public class LInuxCondition implements Condition {
 	public boolean matches(ConditionContext context, AnnotatedTypeMetadata metadata) {
 

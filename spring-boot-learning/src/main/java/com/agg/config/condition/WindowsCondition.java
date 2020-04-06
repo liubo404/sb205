@@ -25,6 +25,7 @@ public class WindowsCondition implements Condition {
 		Environment env = context.getEnvironment();
 
 		//4.获取bean定义的注册类
+		//可以判断ioc中bean注册情况，也可以给ioc中注册bean
 		BeanDefinitionRegistry registry = context.getRegistry();
 
 
