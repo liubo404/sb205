@@ -6,7 +6,13 @@ public class DemoConTest {
 
 	@Test
 	public void threadTest() {
-		System.out.println("----test1");
+
+		Thread t1 = new Thread(){
+			@Override
+			public void run() {
+				super.run();
+			}
+		};
 	}
 
 
