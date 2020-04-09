@@ -47,13 +47,15 @@ public class DemoCon {
 //
 //		writeToFile();
 
-		new Thread("READ_DB") {
+		Thread t = new Thread("READ_DB") {
 			@Override
 			public void run() {
+				log("thread_name="+Thread.currentThread().getName());
 				readFromDB();
 			}
-		}.start();
-
+		};
+//		t.start();
+		t.run();
 
 		new Thread("WRITE_FILE") {
 			@Override

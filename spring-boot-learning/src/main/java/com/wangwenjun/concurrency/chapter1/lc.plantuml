@@ -1,0 +1,26 @@
+@startuml
+
+[*] --> New
+New -> Runnable : start()
+
+Running -up-> Runnable
+Runnable -down-> Running : CPU dispatch
+
+
+
+
+
+Runnable -> Terminated
+
+Running -> blocked : sleep/lock
+
+blocked -up-> Terminated : interupt
+
+blocked -left-> Runnable
+Running -up-> Terminated
+
+Terminated ->[*]
+
+
+
+@enduml
