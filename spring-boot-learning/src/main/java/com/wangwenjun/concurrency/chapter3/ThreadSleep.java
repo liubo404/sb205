@@ -6,9 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author liubo
- * @date 2020-04-11 13:54
- * @description
+ *  interrupt supported
  **/
 @Slf4j
 public class ThreadSleep {
