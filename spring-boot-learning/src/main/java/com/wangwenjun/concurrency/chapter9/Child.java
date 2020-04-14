@@ -11,4 +11,7 @@ public class Child  extends Parent{
 
 	public static int x = 10;
 
+	public Child() {
+		System.out.println("Child constructor.....");
+	}
 }

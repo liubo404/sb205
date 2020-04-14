@@ -11,4 +11,7 @@ public class Parent {
 
 	public static int y = 10;
 
+	public Parent() {
+		System.out.println("parent constructor.....");
+	}
 }

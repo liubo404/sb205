@@ -12,5 +12,7 @@ public class ActiveLoadTest {
 		// only parent initialized.
 		log.info("If child just use parent static variable, child won't be initialized:{}",Child.y);
 
+		Child c = new Child();
+
 	}
 }
