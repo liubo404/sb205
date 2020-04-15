@@ -29,11 +29,43 @@ public class EventQueue {
 	}
 
 
-	public void offer(Event event){
-		synchronized (eventQueue){
-			if(eventQueue.size()>=MAX){
+	public void offer(Event event) {
+		synchronized (eventQueue) {
+			if (eventQueue.size() >= MAX) {
+
+				log.info("The queue is full");
+				try {
+					eventQueue.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+				log.info("The new event is submitted");
+
+				eventQueue.addLast(event);
+				eventQueue.notify();
+			}
+		}
+	}
+
+	public Event take() {
+		synchronized (eventQueue) {
+			if (eventQueue.isEmpty()) {
+				log.info("The queue is empty");
+
+				try {
+					eventQueue.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+
 
 			}
+			Event event = eventQueue.removeFirst();
+			this.eventQueue.notify();
+
+			log.info("The event {} is handled", event);
+
+			return event;
 		}
 	}
 }
