@@ -1,4 +1,7 @@
-package com.wangwenjun.concurrency.chapter23;
+package com.wangwenjun.concurrency.chapter23.v2;
+
+import java.sql.Time;
+import java.util.concurrent.TimeUnit;
 
 public abstract class Latch {
 
@@ -10,6 +13,8 @@ public abstract class Latch {
 	}
 
 	public abstract void await() throws InterruptedException;
+
+	public abstract void await(TimeUnit unit, long time) throws InterruptedException, WaitTimeoutException;
 
 	public abstract void countDown();
 
