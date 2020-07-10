@@ -1,31 +1,53 @@
 package com.wangwenjun.concurrency.video.phase2.chapter10;
 
-import com.wangwenjun.concurrency.video.phase2.chapter6.ReadWriteLock;
+import lombok.extern.slf4j.Slf4j;
 
+import java.sql.Time;
+import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
-public class ThreadLocalDemo {
+@Slf4j
+public class ThreadLocalDemo2 {
 
-	private static  ThreadLocal<String> tl = new ThreadLocal(){
-		@Override
-		protected String initialValue() {
-			return "ALEX";
-		}
-	};
+	private static ThreadLocal<String> tl = ThreadLocal.withInitial(() -> "ALEX");
+
+	private final static Random random = new Random(System.currentTimeMillis());
 
 
-	//JVM start the main thread
 	public static void main(String[] args) throws InterruptedException {
+		Thread t1 = new Thread(() -> {
+			tl.set("Thread-t1");
+			try {
+				TimeUnit.MILLISECONDS.sleep(random.nextInt(1000));
+				log.info("{} -1-> {}",Thread.currentThread().getName(), tl.get());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}, "T1");
 
-//		tl.set("ALex");
+		t1.start();
+
+		Thread t2 = new Thread(() -> {
+			tl.set("Thread-t2");
+			try {
+				TimeUnit.MILLISECONDS.sleep(random.nextInt(1000));
+				log.info("{} -2-> {}",Thread.currentThread().getName(), tl.get());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}, "T2");
+		t2.start();
 
 
-		TimeUnit.MILLISECONDS.sleep(100);
+		t1.join();
+		t2.join();
 
-		System.out.println(tl.get());
+		log.info("===================================");
 
+		log.info("{} -3-> {}",Thread.currentThread().getName(), tl.get());
 
 
 	}
+
 
 }

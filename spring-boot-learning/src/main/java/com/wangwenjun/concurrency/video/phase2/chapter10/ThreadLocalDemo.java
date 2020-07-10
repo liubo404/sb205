@@ -1,53 +1,31 @@
-package com.wangwenjun.concurrency.video.phase2.chapter6;
+package com.wangwenjun.concurrency.video.phase2.chapter10;
+
+import com.wangwenjun.concurrency.video.phase2.chapter6.ReadWriteLock;
 
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author liubo
- * @date 2020-04-22 14:52
- * @description
- **/
-public class SharedData {
+public class ThreadLocalDemo {
 
-	private final ReadWriteLock lock = new ReadWriteLock();
-
-	private final char[] buffer;
-
-	public SharedData(char[] buffer) {
-		this.buffer = buffer;
-		for(int i=0;i<buffer.length;i++){
-			buffer[i]='*';
+	private static  ThreadLocal<String> tl = new ThreadLocal(){
+		@Override
+		protected String initialValue() {
+			return "ALEX";
 		}
-	}
+	};
 
-	public char[] read() throws InterruptedException {
-		try{
-			lock.readLock();
-			return doRead();
-		}finally {
-			lock.readUnlock();
-		}
-	}
 
-	private char[] doRead() {
+	//JVM start the main thread
+	public static void main(String[] args) throws InterruptedException {
 
-		char[] newBuffer = new char[buffer.length];
+//		tl.set("ALex");
 
-		for(int i=0;i<buffer.length;i++){
-			newBuffer[i]=buffer[i];
-		}
 
-		slowly(50);
-		return newBuffer;
+		TimeUnit.MILLISECONDS.sleep(100);
+
+		System.out.println(tl.get());
+
+
 
 	}
 
-	private void slowly(int i) {
-
-		try {
-			TimeUnit.MILLISECONDS.sleep(i);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
 }

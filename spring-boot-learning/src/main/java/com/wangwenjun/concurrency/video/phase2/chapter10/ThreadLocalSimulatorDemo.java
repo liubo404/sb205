@@ -8,32 +8,50 @@ import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class ThreadLocalSimulator<T> {
-	private final Map<Thread, T> storage = new HashMap<>();
-
-
-	public void set(T t) {
-		synchronized (this) {
-			Thread key = Thread.currentThread();
-			storage.put(key, t);
+public class ThreadLocalSimulatorDemo {
+	private static ThreadLocalSimulator<String> tl = new ThreadLocalSimulator() {
+		@Override
+		public String initialValue() {
+			return "No VALUE";
 		}
-	}
+	};
 
 
-	public T get() {
-		synchronized (this) {
-			Thread key = Thread.currentThread();
-			T value = storage.get(key);
-			if (value == null) {
-				return initialValue();
-			} else {
-				return value;
+	private final static Random random = new Random(System.currentTimeMillis());
+
+
+	public static void main(String[] args) throws InterruptedException {
+		Thread t1 = new Thread(() -> {
+			tl.set("Thread-t1");
+			try {
+				TimeUnit.MILLISECONDS.sleep(random.nextInt(1000));
+				log.info("{} -1-> {}", Thread.currentThread().getName(), tl.get());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
 			}
-		}
-	}
+		}, "T1");
 
-	private T initialValue() {
+		t1.start();
 
-		return null;
+		Thread t2 = new Thread(() -> {
+			tl.set("Thread-t2");
+			try {
+				TimeUnit.MILLISECONDS.sleep(random.nextInt(1000));
+				log.info("{} -2-> {}", Thread.currentThread().getName(), tl.get());
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}, "T2");
+		t2.start();
+
+
+		t1.join();
+		t2.join();
+
+		log.info("===================================");
+
+		log.info("{} -3-> {}", Thread.currentThread().getName(), tl.get());
+
+
 	}
 }

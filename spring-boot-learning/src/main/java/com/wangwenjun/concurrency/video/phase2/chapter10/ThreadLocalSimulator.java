@@ -2,52 +2,38 @@ package com.wangwenjun.concurrency.video.phase2.chapter10;
 
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.Time;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class ThreadLocalDemo2 {
-
-	private static ThreadLocal<String> tl = ThreadLocal.withInitial(() -> "ALEX");
-
-	private final static Random random = new Random(System.currentTimeMillis());
+public class ThreadLocalSimulator<T> {
+	private final Map<Thread, T> storage = new HashMap<>();
 
 
-	public static void main(String[] args) throws InterruptedException {
-		Thread t1 = new Thread(() -> {
-			tl.set("Thread-t1");
-			try {
-				TimeUnit.MILLISECONDS.sleep(random.nextInt(1000));
-				log.info("{} -1-> {}",Thread.currentThread().getName(), tl.get());
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}, "T1");
-
-		t1.start();
-
-		Thread t2 = new Thread(() -> {
-			tl.set("Thread-t2");
-			try {
-				TimeUnit.MILLISECONDS.sleep(random.nextInt(1000));
-				log.info("{} -2-> {}",Thread.currentThread().getName(), tl.get());
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}, "T2");
-		t2.start();
-
-
-		t1.join();
-		t2.join();
-
-		log.info("===================================");
-
-		log.info("{} -3-> {}",Thread.currentThread().getName(), tl.get());
-
-
+	public void set(T t) {
+		synchronized (this) {
+			Thread key = Thread.currentThread();
+			storage.put(key, t);
+		}
 	}
 
 
+	public T get() {
+		synchronized (this) {
+			Thread key = Thread.currentThread();
+			T value = storage.get(key);
+			if (value == null) {
+				return initialValue();
+			} else {
+				return value;
+			}
+		}
+	}
+
+	public T initialValue() {
+
+		return null;
+	}
 }
